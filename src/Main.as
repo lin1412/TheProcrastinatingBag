@@ -32,15 +32,16 @@ package {
 			stage.addEventListener(Event.DEACTIVATE, deactivate);
 			
 			loadBitMap = new MyLoadingClass();
-			loadBitMap.x = loadBitMap.width / 2;
-			loadBitMap.y = 0;
+			loadBitMap.scaleX = (stage.stageWidth / 854);
+			loadBitMap.scaleY = (stage.stageHeight / 480);
+			loadBitMap.x = stage.stageWidth / 2 - loadBitMap.width / 2 ;
+			loadBitMap.y = (stage.stageHeight - loadBitMap.height) / 2;
 			addChild(loadBitMap);
 			// touch or gesture?
 			//Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
 			
 			// entry point
 			SetupStarling();
-			
 		}
 		
 		private function SetupStarling():void {

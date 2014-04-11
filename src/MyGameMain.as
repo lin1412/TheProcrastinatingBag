@@ -129,7 +129,7 @@ package {
 			timeLapse.y = 5 * scalY;
 			addChild(timeLapse);
 			
-			highScore = new TextField(250 * scalX, 30 * scalY, "Longest Time Procrastinated:", "Verdana", 15 * minScal, 0xF50000, true);
+			highScore = new TextField(300 * scalX, 30 * scalY, "Best Time:", "Verdana", 15 * minScal, 0xF50000, true);
 			highScore.x = stage.stageWidth - (250 * scalX);
 			highScore.y = 0;
 			addChild(highScore);
