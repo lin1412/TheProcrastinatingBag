@@ -109,6 +109,7 @@ package {
 		}
         
         private function onAddedToStage(e:Event):void {
+			Main.inst.removeLoading();
             removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			scalX = stage.stageWidth / 854;
 			scalY = stage.stageHeight / 480;

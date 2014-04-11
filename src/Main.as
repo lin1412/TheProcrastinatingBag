@@ -1,5 +1,6 @@
 package {
 	import flash.desktop.NativeApplication;
+	import flash.display.Bitmap;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -18,13 +19,22 @@ package {
 	public class Main extends Sprite 
 	{
 		private var _starling:Starling;
+		[Embed(source = "loading.png")]
+		private static const MyLoadingClass:Class;
+		private var loadBitMap:Bitmap;
+		public static var inst:Main;
 		
 		public function Main():void 
 		{
+			inst = this;
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
 			stage.addEventListener(Event.DEACTIVATE, deactivate);
 			
+			loadBitMap = new MyLoadingClass();
+			loadBitMap.x = loadBitMap.width / 2;
+			loadBitMap.y = 0;
+			addChild(loadBitMap);
 			// touch or gesture?
 			//Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
 			
@@ -43,8 +53,12 @@ package {
 			
 			// Define level of antialiasing, 
 			_starling.antiAliasing = 1;
-			
 			_starling.start();
+		}
+		
+		public function removeLoading():void {
+			removeChild(loadBitMap);
+			loadBitMap = null;
 		}
 		
 		private function deactivate(e:Event):void 
