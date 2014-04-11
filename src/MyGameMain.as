@@ -23,7 +23,6 @@ package {
 		public static var sharedObject:SharedObject;
 		public static const DATA_SHARED_OBJECT:String = "dataSharedObject";
 		
-		
         [Embed(source = "lib.png")]
 		private static const MyLibClass:Class;
 		private var _libImage:Image;
@@ -65,6 +64,10 @@ package {
         private static const MyAuraClass:Class;
         private var _auraImage:Image;
 		
+				
+		private var scalX:Number = 1;
+		private var scalY:Number = 1;
+		
 		private var guide:TextField;
 		private var timeLapse:TextField;
 		private var highScore:TextField;
@@ -90,7 +93,7 @@ package {
          
         public function MyGameMain() {
             super();
-            
+            	
             addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
             
         }
@@ -107,23 +110,26 @@ package {
         
         private function onAddedToStage(e:Event):void {
             removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			scalX = stage.stageWidth / 854;
+			scalY = stage.stageHeight / 480;
+			var minScal:Number = Math.min(scalX, scalY);
 			
 			addBG();
 			//add guide
 			var string:String = "Guide the backpack to avoid the books/borders and keep procrastinating for as long as possible. Burgers allow teleportation for 5 seconds. Tap takeout-bag to activate."
-			guide = new TextField(700, 200, string, "Verdana", 20, 0xF50000, true);
-			guide.x = stage.stageWidth / 2 - 350;
-			guide.y = stage.stageHeight - 140;
+			guide = new TextField(700 * scalX, 200 * scalY, string, "Verdana", 20 * minScal, 0xF50000, true);
+			guide.x = stage.stageWidth / 2 - (350 * scalX);
+			guide.y = stage.stageHeight - (140 * scalY);
 			addChild(guide);
 			
 			//add timers to stage
-			timeLapse = new TextField(300, 50, "Time Procrastinated:", "Verdana", 20, 0xFFFFFF, true);
-			timeLapse.x = stage.stageWidth / 2 - 150;
-			timeLapse.y = 5;
+			timeLapse = new TextField(300 * scalX, 50 * scalY, "Time Procrastinated:", "Verdana", 20 * minScal, 0xFFFFFF, true);
+			timeLapse.x = stage.stageWidth / 2 - (150 * scalX);
+			timeLapse.y = 5 * scalY;
 			addChild(timeLapse);
 			
-			highScore = new TextField(250, 30, "Longest Time Procrastinated:", "Verdana", 15, 0xF50000, true);
-			highScore.x = stage.stageWidth - 250;
+			highScore = new TextField(250 * scalX, 30 * scalY, "Longest Time Procrastinated:", "Verdana", 15 * minScal, 0xF50000, true);
+			highScore.x = stage.stageWidth - (250 * scalX);
 			highScore.y = 0;
 			addChild(highScore);
 			
@@ -132,9 +138,9 @@ package {
 				save("highScore", 0);
 				hS = 0;
 			}
-            highScoreS = new TextField(60, 30, String(hS), "Verdana", 15, 0xF50000, true);
-			highScoreS.x = stage.stageWidth - 60;
-			highScoreS.y = 30;
+            highScoreS = new TextField(60 * scalX, 30 * scalY, String(hS), "Verdana", 15 * minScal, 0xF50000, true);
+			highScoreS.x = stage.stageWidth - (60 * scalX);
+			highScoreS.y = 30 * scalY;
 			addChild(highScoreS);
 			
 			//add the burger and burgerBag
@@ -142,6 +148,8 @@ package {
             _burgerImage = Image.fromBitmap(myBurgerBitmap);
 			_burgerImage.pivotX = _burgerImage.width / 2;
 			_burgerImage.pivotY = _burgerImage.height / 2;
+			_burgerImage.scaleX = scalX;
+			_burgerImage.scaleY = scalY;
 			_burgerImage.x = -_burgerImage.width;
 			_burgerImage.y = -_burgerImage.height;
 			addChild(_burgerImage);
@@ -149,9 +157,11 @@ package {
 			var myBurgerBagBitmap:Bitmap = new MyBurgerBagClass();
             _burgerBagImage = Image.fromBitmap(myBurgerBagBitmap);
 			_burgerBagImage.pivotX = _burgerBagImage.width/2;
-			_burgerBagImage.pivotY = _burgerBagImage.height/2;
-			_burgerBagImage.x = 45;
-			_burgerBagImage.y = 55;
+			_burgerBagImage.pivotY = _burgerBagImage.height / 2;
+			_burgerBagImage.scaleX = scalX;
+			_burgerBagImage.scaleY = scalY;
+			_burgerBagImage.x = 45 * scalX;
+			_burgerBagImage.y = 55 * scalY;
 			_burgerBagImage.addEventListener(TouchEvent.TOUCH, onBagClick);
 			addChild(_burgerBagImage);
 			
@@ -159,15 +169,17 @@ package {
 			var myAuraBitmap:Bitmap = new MyAuraClass();
             _auraImage = Image.fromBitmap(myAuraBitmap);
 			_auraImage.pivotX = _auraImage.width/2;
-			_auraImage.pivotY = _auraImage.height/2;
-			_auraImage.x = 44;
-			_auraImage.y = 50;
+			_auraImage.pivotY = _auraImage.height / 2;
+			_auraImage.scaleX = scalX;
+			_auraImage.scaleY = scalY;
+			_auraImage.x = 44 * scalX;
+			_auraImage.y = 50 * scalY;
 			_auraImage.visible = false;
 			addChild(_auraImage);
 			//count of number of power ups
-			burgerCount = new TextField(50, 50, String(teleportNum), "Verdana", 40, 0xF50000, true);
-			burgerCount.x = 25;
-			burgerCount.y = 35;
+			burgerCount = new TextField(50 * scalX, 50 * scalX, String(teleportNum), "Verdana", 40 * minScal, 0xF50000, true);
+			burgerCount.x = 25 * scalX;
+			burgerCount.y = 35 * scalY;
 			burgerCount.addEventListener(TouchEvent.TOUCH, onBagClick);
 			addChild(burgerCount);
 			
@@ -180,6 +192,9 @@ package {
             // (Otherwise by default it's top left)
             _playerImage.pivotX = _playerImage.width / 2;
             _playerImage.pivotY = _playerImage.height / 2;
+			//scale the player
+			_playerImage.scaleX = scalX;
+			_playerImage.scaleY = scalY;
             // Where to place the image on screen
             _playerImage.x = stage.stageWidth / 2;
             _playerImage.y = stage.stageHeight / 2;
@@ -190,6 +205,8 @@ package {
 			//make the losing image
 			var myBitmap2:Bitmap = new MyPlayerLostClass();
             _playerLostImage = Image.fromBitmap(myBitmap2);
+			_playerLostImage.scaleX = scalX;
+			_playerLostImage.scaleY = scalY;
 			_playerLostImage.x = stage.stageWidth / 2;
             _playerLostImage.y = stage.stageHeight - _playerImage.height;
 			addChild(_playerLostImage);
@@ -198,6 +215,8 @@ package {
 			//add the msg after losing
 			var myMsgBitmap:Bitmap = new MyMsgClass();
             _msgImage = Image.fromBitmap(myMsgBitmap);
+			_msgImage.scaleX = scalX;
+			_msgImage.scaleY = scalY;
 			_msgImage.x = stage.stageWidth / 2;
             _msgImage.y = stage.stageHeight - _playerImage.height -  _msgImage.height;
 			addChild(_msgImage);
@@ -206,11 +225,12 @@ package {
 			//add the start button
 			var myStartBitmap:Bitmap = new MyStartClass();
             _startImage = Image.fromBitmap(myStartBitmap);
+			_startImage.scaleX = scalX;
+			_startImage.scaleY = scalY;
 			_startImage.x = stage.stageWidth / 2 - _startImage.width/2;
 			_startImage.y = stage.stageHeight / 2 - _startImage.height / 2;
 			_startImage.addEventListener(TouchEvent.TOUCH, onStartButtonClick);
 			addChild(_startImage);
-			
 			
         }
 		
@@ -252,15 +272,19 @@ package {
 				//background
 				var myBGBitmap:Bitmap = new MyLibClass();6
 				_libImage = Image.fromBitmap(myBGBitmap);
+				_libImage.scaleX = scalX;
+				_libImage.scaleY = scalY;
 				addChild(_libImage);
 				_libImage2 = Image.fromBitmap(myBGBitmap);
-				_libImage2.x = 854;
+				_libImage2.scaleX = scalX;
+				_libImage2.scaleY = scalY;
+				_libImage2.x = _libImage.width;
 				addChild(_libImage2);
 			}
 			//reset bg
 			else{
 				_libImage.x = 0;
-				_libImage2.x = 854;
+				_libImage2.x = _libImage.width;
 			}
 			
 		}
@@ -279,7 +303,7 @@ package {
 			tBegin = 0;
 			tEnd = 0;
 			lost = false;
-			hitBox = new Rectangle(_playerImage.x - _playerImage.width/2, _playerImage.y - _playerImage.height/2, _playerImage.width - 5, _playerImage.width - 5);
+			hitBox = new Rectangle(_playerImage.x - _playerImage.width/2, _playerImage.y - _playerImage.height/2, _playerImage.width - (5 * scalX), _playerImage.width - (5 * scalY));
 			noteArray = new Vector.<Image>();
 			textArray = new Vector.<Image>();
 			speedArray = new Vector.<int>();
@@ -292,11 +316,11 @@ package {
 			
 						
 			//set up object speeds
-			speedArray.push(3);
-			speedArray.push(3.5);
-			speedArray.push(4);
-			speedArray.push(4.5);
-			speedArray.push(5);
+			speedArray.push(3 * scalX);
+			speedArray.push(3.5 * scalX);
+			speedArray.push(4 * scalX);
+			speedArray.push(4.5 * scalX);
+			speedArray.push(5 * scalX);
 			
 
 			addObject(lvNum);
@@ -311,7 +335,7 @@ package {
 				_playerImage.y -= (_playerImage.y - event.getTouch(stage).globalY) * .2;
 			}
 			else if (touchB && teleport && !bagClicked) {
-				_playerImage.x = event.getTouch(stage).globalX - 40;
+				_playerImage.x = event.getTouch(stage).globalX - 60;
 				_playerImage.y = event.getTouch(stage).globalY;
 			}
 			//right after the bag has been clicked, ignore the 1st touch event
@@ -379,7 +403,9 @@ package {
 				_noteImage = Image.fromBitmap(myNoteBitmap);
 				_noteImage.pivotX = _noteImage.width / 2;
 				_noteImage.pivotY = _noteImage.height / 2;
-				_noteImage.y = 50 + Math.random() * (stage.stageHeight - 100 );
+				_noteImage.scaleX = scalX;
+				_noteImage.scaleY = scalY;
+				_noteImage.y = _playerImage.height/2 + Math.random() * (stage.stageHeight - _playerImage.height );
 				_noteImage.x = Math.random() * stage.stageWidth * -2.5;
 				addChild(_noteImage);
 				noteArray.push(_noteImage);
@@ -389,7 +415,9 @@ package {
 				_textImage = Image.fromBitmap(myTextBitmap);
 				_textImage.pivotX = _textImage.width / 2;
 				_textImage.pivotY = _textImage.height / 2;
-				_textImage.y = 50 + Math.random() * (stage.stageHeight - 100 );
+				_textImage.scaleX = scalX;
+				_textImage.scaleY = scalY;
+				_textImage.y = _playerImage.height/2 + Math.random() * (stage.stageHeight - _playerImage.height );
 				_textImage.x = Math.random() * stage.stageWidth * -2.5;
 				addChild(_textImage);
 				textArray.push(_textImage);
@@ -397,7 +425,7 @@ package {
 			
 			//add one burger per lv
 			burgerStage = true;
-			_burgerImage.y = 50 + Math.random() * (stage.stageHeight - 100 );
+			_burgerImage.y = _playerImage.height/2 + Math.random() * (stage.stageHeight - _playerImage.height );
 			_burgerImage.x = Math.random() * stage.stageWidth * -2.5;
 
 			setChildIndex(timeLapse, numChildren - 1);
@@ -423,14 +451,14 @@ package {
 				}
 				
 				// moves background
-				_libImage.x += -1;
-				_libImage2.x += -1;
+				_libImage.x += -1 * scalX;
+				_libImage2.x += -1 * scalX;
 			
 				if (_libImage.x <= -(_libImage.width)) {
-					_libImage.x = _libImage2.x + _libImage.width;
+					_libImage.x += _libImage.width + _libImage2.width; 
 				}
 				if (_libImage2.x <= -(_libImage2.width)) {
-					_libImage2.x = _libImage.x + _libImage2.width;
+					_libImage2.x += _libImage2.width + _libImage.width;
 				}
 			
 				//hit collision and object movement
@@ -442,19 +470,19 @@ package {
 						break;
 					}
 					
-					noteArray[i].x += speedArray[i%5] * 45 *e.passedTime;
+					noteArray[i].x += speedArray[i%5] * 50 * e.passedTime;
 					noteArray[i].rotation += .07;
 					
-					textArray[i].x += speedArray[i%5] * 45 *e.passedTime;
+					textArray[i].x += speedArray[i%5] * 50 * e.passedTime;
 					textArray[i].rotation += .09;
 					
 					//if they did their job, reset them
 					if ( noteArray[i].x >= stage.stageWidth ) {
-						noteArray[i].y = 50 + Math.random() * (stage.stageHeight - 100 );
+						noteArray[i].y = _playerImage.height/2 + Math.random() * (stage.stageHeight - _playerImage.height );
 						noteArray[i].x = Math.random() * stage.stageWidth * -2.5;
 					}
 					if ( textArray[i].x >= stage.stageWidth ) {
-						textArray[i].y = 50 + Math.random() * (stage.stageHeight - 100 );
+						textArray[i].y = _playerImage.height/2 + Math.random() * (stage.stageHeight - _playerImage.height );
 						textArray[i].x = Math.random() * stage.stageWidth * -2.5;
 					}
 				}
