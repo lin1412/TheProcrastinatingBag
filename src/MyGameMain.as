@@ -15,7 +15,10 @@ package {
 	import starling.events.TouchEvent;
 
 
-
+	/**
+	 * ...
+	 * @author FireAngelx
+	 */
     public class MyGameMain extends Sprite {
 		public static var sharedObject:SharedObject;
 		public static const DATA_SHARED_OBJECT:String = "dataSharedObject";
@@ -58,6 +61,10 @@ package {
         private static const MyBurgerBagClass:Class;
         private var _burgerBagImage:Image;
 		
+		[Embed(source="burgerBagAura.png")]
+        private static const MyAuraClass:Class;
+        private var _auraImage:Image;
+		
 		private var guide:TextField;
 		private var timeLapse:TextField;
 		private var highScore:TextField;
@@ -73,6 +80,8 @@ package {
 		private var frame:int;
 		private var timer:Number;
 		private var seconds:int;
+		private var tBegin:Number;
+		private var tEnd:Number;
 		private var lost:Boolean;
 		private var hitBox:Rectangle;
 		private var noteArray:Vector.<Image>;
@@ -100,12 +109,11 @@ package {
             removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			
 			addBG();
-			
 			//add guide
-			var string:String = "Guide the backpack to avoid the books/borders and keep procrastinating for as long as possible. Burgers allows teleportation for 5 seconds, tap takeout-bag to activate."
-			guide = new TextField(600, 200, string, "Verdana", 20, 0xF50000, true);
-			guide.x = stage.stageWidth / 2 - 300;
-			guide.y = stage.stageHeight - 150;
+			var string:String = "Guide the backpack to avoid the books/borders and keep procrastinating for as long as possible. Burgers allow teleportation for 5 seconds. Tap takeout-bag to activate."
+			guide = new TextField(700, 200, string, "Verdana", 20, 0xF50000, true);
+			guide.x = stage.stageWidth / 2 - 350;
+			guide.y = stage.stageHeight - 140;
 			addChild(guide);
 			
 			//add timers to stage
@@ -116,7 +124,7 @@ package {
 			
 			highScore = new TextField(250, 30, "Longest Time Procrastinated:", "Verdana", 15, 0xF50000, true);
 			highScore.x = stage.stageWidth - 250;
-			highScore.y = 5;
+			highScore.y = 0;
 			addChild(highScore);
 			
 			hS = load("highScore");
@@ -124,9 +132,9 @@ package {
 				save("highScore", 0);
 				hS = 0;
 			}
-            highScoreS = new TextField(30, 30, String(hS), "Verdana", 15, 0xF50000, true);
-			highScoreS.x = stage.stageWidth - 50;
-			highScoreS.y = 35;
+            highScoreS = new TextField(60, 30, String(hS), "Verdana", 15, 0xF50000, true);
+			highScoreS.x = stage.stageWidth - 60;
+			highScoreS.y = 30;
 			addChild(highScoreS);
 			
 			//add the burger and burgerBag
@@ -134,18 +142,32 @@ package {
             _burgerImage = Image.fromBitmap(myBurgerBitmap);
 			_burgerImage.pivotX = _burgerImage.width / 2;
 			_burgerImage.pivotY = _burgerImage.height / 2;
+			_burgerImage.x = -_burgerImage.width;
+			_burgerImage.y = -_burgerImage.height;
 			addChild(_burgerImage);
 			
 			var myBurgerBagBitmap:Bitmap = new MyBurgerBagClass();
             _burgerBagImage = Image.fromBitmap(myBurgerBagBitmap);
-			_burgerBagImage.x = 10;
-			_burgerBagImage.y = 10;
+			_burgerBagImage.pivotX = _burgerBagImage.width/2;
+			_burgerBagImage.pivotY = _burgerBagImage.height/2;
+			_burgerBagImage.x = 45;
+			_burgerBagImage.y = 55;
 			_burgerBagImage.addEventListener(TouchEvent.TOUCH, onBagClick);
 			addChild(_burgerBagImage);
 			
-			burgerCount = new TextField(40, 40, String(teleportNum), "Verdana", 30, 0xF50000, true);
-			burgerCount.x = 15;
-			burgerCount.y = 25;
+			//add aura for the bag
+			var myAuraBitmap:Bitmap = new MyAuraClass();
+            _auraImage = Image.fromBitmap(myAuraBitmap);
+			_auraImage.pivotX = _auraImage.width/2;
+			_auraImage.pivotY = _auraImage.height/2;
+			_auraImage.x = 44;
+			_auraImage.y = 50;
+			_auraImage.visible = false;
+			addChild(_auraImage);
+			//count of number of power ups
+			burgerCount = new TextField(50, 50, String(teleportNum), "Verdana", 40, 0xF50000, true);
+			burgerCount.x = 25;
+			burgerCount.y = 35;
 			burgerCount.addEventListener(TouchEvent.TOUCH, onBagClick);
 			addChild(burgerCount);
 			
@@ -192,8 +214,7 @@ package {
 			
         }
 		
-		private function onStartButtonClick(event:TouchEvent):void
-		{
+		private function onStartButtonClick(event:TouchEvent):void {
 			var touchB:Touch = event.getTouch(this, TouchPhase.BEGAN);
 			if (touchB) {
 				
@@ -205,17 +226,25 @@ package {
 				addEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
 			}
 		}
-		private function onBagClick(event:TouchEvent):void
-		{
+		private function onBagClick(event:TouchEvent):void {
 			var touchB:Touch = event.getTouch(this, TouchPhase.BEGAN);
-			if (touchB && teleportNum > 0) {
+			if (touchB && teleportNum > 0 && !lost) {
 				teleport = true;
 				teleportNum--;
 				burgerCount.text = String(teleportNum);
+				_auraImage.visible = true;
 				
 				//so player don't move
 				bagClicked = true;
+				
+				//set timer
+				teleportTimer();
 			}
+		}
+		
+		private function teleportTimer():void {
+			tBegin = timer;
+			tEnd = tBegin + Number(5);
 		}
 		private function addBG():void {
 			//1st time
@@ -247,8 +276,10 @@ package {
 			bagClicked = false;
 			frame = 0;
 			timer = 0;
+			tBegin = 0;
+			tEnd = 0;
 			lost = false;
-			hitBox = new Rectangle(_playerImage.x - _playerImage.width/2, _playerImage.y - _playerImage.height/2, _playerImage.width - 4, _playerImage.width - 4);
+			hitBox = new Rectangle(_playerImage.x - _playerImage.width/2, _playerImage.y - _playerImage.height/2, _playerImage.width - 5, _playerImage.width - 5);
 			noteArray = new Vector.<Image>();
 			textArray = new Vector.<Image>();
 			speedArray = new Vector.<int>();
@@ -276,8 +307,8 @@ package {
 			var touchB:Touch = event.getTouch(this, TouchPhase.BEGAN);
 			var touchM:Touch = event.getTouch(this, TouchPhase.MOVED);
 			if( (touchB || touchM) && !teleport){
-				_playerImage.x -= (_playerImage.x - event.getTouch(stage).globalX + 40) * .3;
-				_playerImage.y -= (_playerImage.y - event.getTouch(stage).globalY) * .3;
+				_playerImage.x -= (_playerImage.x - event.getTouch(stage).globalX + 60) * .2;
+				_playerImage.y -= (_playerImage.y - event.getTouch(stage).globalY) * .2;
 			}
 			else if (touchB && teleport && !bagClicked) {
 				_playerImage.x = event.getTouch(stage).globalX - 40;
@@ -305,8 +336,16 @@ package {
 		}
 		
 		private function lose():void {
-			//change player image and bring up start menu after pausing game
 			lost = true;
+					
+			//update high score and save
+			if (seconds > int(highScoreS.text)) {
+				highScoreS.text = String(seconds);
+				hS = seconds;
+				save("highScore", seconds);
+			}
+			
+			//change player image and bring up start menu after pausing game
 			_playerImage.visible = false;
 			removeEventListener(TouchEvent.TOUCH, onTouch)
 			_playerLostImage.x = _playerImage.x;
@@ -318,6 +357,8 @@ package {
 			_startImage.addEventListener(TouchEvent.TOUCH, onStartButtonClick);
 			setChildIndex(_startImage, numChildren - 1);
 			
+			_auraImage.visible = false;
+			
 			if (noteArray != null && textArray != null){
 				for ( var i:int = 0; i < noteArray.length; i++) {
 					removeChild(noteArray[i]);
@@ -326,14 +367,7 @@ package {
 			}
 			noteArray = null;
 			textArray = null;
-			
-			//update high score and save
-			if (seconds > int(highScoreS.text)) {
-				highScoreS.text = "" + seconds;
-				hS = seconds;
-				save("highScore", seconds);
-			}
-			
+		
 		}
 		
 		private function addObject(lv: int):void {
@@ -345,8 +379,8 @@ package {
 				_noteImage = Image.fromBitmap(myNoteBitmap);
 				_noteImage.pivotX = _noteImage.width / 2;
 				_noteImage.pivotY = _noteImage.height / 2;
-				_noteImage.y = 50 + Math.random() * 400;
-				_noteImage.x = (Math.random() * -900) + (Math.random() * -900);
+				_noteImage.y = 50 + Math.random() * (stage.stageHeight - 100 );
+				_noteImage.x = Math.random() * stage.stageWidth * -2.5;
 				addChild(_noteImage);
 				noteArray.push(_noteImage);
 				
@@ -355,16 +389,16 @@ package {
 				_textImage = Image.fromBitmap(myTextBitmap);
 				_textImage.pivotX = _textImage.width / 2;
 				_textImage.pivotY = _textImage.height / 2;
-				_textImage.y = 50 + Math.random() * 400;
-				_textImage.x = (Math.random() * -900) + (Math.random() * -900);
+				_textImage.y = 50 + Math.random() * (stage.stageHeight - 100 );
+				_textImage.x = Math.random() * stage.stageWidth * -2.5;
 				addChild(_textImage);
 				textArray.push(_textImage);
 			}
 			
 			//add one burger per lv
 			burgerStage = true;
-			_burgerImage.y = 50 + Math.random() * 400;
-			_burgerImage.x = (Math.random() * -900) + (Math.random() * -900);
+			_burgerImage.y = 50 + Math.random() * (stage.stageHeight - 100 );
+			_burgerImage.x = Math.random() * stage.stageWidth * -2.5;
 
 			setChildIndex(timeLapse, numChildren - 1);
 			setChildIndex(highScore, numChildren - 1);
@@ -382,16 +416,21 @@ package {
 				seconds = int(timer * 1 );
 				timeLapse.text = "Time Procrastinated: " + seconds + " seconds";
 				
-			
+				//limit teleport
+				if (teleport && tEnd <= timer) {
+					teleport = false;
+					_auraImage.visible = false;
+				}
+				
 				// moves background
 				_libImage.x += -1;
 				_libImage2.x += -1;
 			
-				if (_libImage.x <= -854) {
-					_libImage.x = _libImage2.x + 854;
+				if (_libImage.x <= -(_libImage.width)) {
+					_libImage.x = _libImage2.x + _libImage.width;
 				}
-				if (_libImage2.x <= -854) {
-					_libImage2.x = _libImage.x + 854;
+				if (_libImage2.x <= -(_libImage2.width)) {
+					_libImage2.x = _libImage.x + _libImage2.width;
 				}
 			
 				//hit collision and object movement
@@ -410,13 +449,13 @@ package {
 					textArray[i].rotation += .09;
 					
 					//if they did their job, reset them
-					if ( noteArray[i].x >= 860 ) {
-						noteArray[i].y = 50 + Math.random() * 400;
-						noteArray[i].x = (Math.random() * -900) + (Math.random() * -900);
+					if ( noteArray[i].x >= stage.stageWidth ) {
+						noteArray[i].y = 50 + Math.random() * (stage.stageHeight - 100 );
+						noteArray[i].x = Math.random() * stage.stageWidth * -2.5;
 					}
-					if ( textArray[i].x >= 860 ) {
-						textArray[i].y = 50 + Math.random() * 400;
-						textArray[i].x = (Math.random() * -900) + (Math.random() * -900);
+					if ( textArray[i].x >= stage.stageWidth ) {
+						textArray[i].y = 50 + Math.random() * (stage.stageHeight - 100 );
+						textArray[i].x = Math.random() * stage.stageWidth * -2.5;
 					}
 				}
 				
@@ -429,7 +468,7 @@ package {
 						
 						//remove burger
 						burgerStage = false;
-						_burgerImage.x = -100;
+						_burgerImage.x = stage.stageWidth * -2;
 					}
 				}
 			

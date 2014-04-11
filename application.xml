@@ -2,13 +2,13 @@
 <application xmlns="http://ns.adobe.com/air/application/3.9">
 	
 	<id>air.TheProcrastinatingBag</id>
-	<versionNumber>0.1</versionNumber>
+	<versionNumber>7.7.7</versionNumber>
 	<supportedProfiles>mobileDevice</supportedProfiles>
 	<filename>TheProcrastinatingBag</filename>
 	
 	<name>TheProcrastinatingBag</name>
-	<description></description>
-	<copyright></copyright>
+	<description>Procrastinate as best as you can.</description>
+	<copyright>FireAngelx</copyright>
 	
 	<android>
 		<manifestAdditions><![CDATA[
