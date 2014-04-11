@@ -50,6 +50,14 @@ package {
 		private static const MyTextClass:Class;
         private var _textImage:Image;
 		
+		[Embed(source="burger.png")]
+        private static const MyBurgerClass:Class;
+        private var _burgerImage:Image;
+		
+		[Embed(source="burgerBag.png")]
+        private static const MyBurgerBagClass:Class;
+        private var _burgerBagImage:Image;
+		
 		private var guide:TextField;
 		private var timeLapse:TextField;
 		private var highScore:TextField;
@@ -57,8 +65,11 @@ package {
 		private var hS:int;
 
 		private var lvNum:int;
-		private var teleport: Boolean;
-		private var teleportNum: int;
+		private var teleport:Boolean;
+		private var teleportNum:int;
+		private var burgerCount:TextField;
+		private var burgerStage:Boolean;
+		private var bagClicked:Boolean;
 		private var frame:int;
 		private var timer:Number;
 		private var seconds:int;
@@ -91,8 +102,8 @@ package {
 			addBG();
 			
 			//add guide
-			//var string:String = "Guide the backpack to avoid the books and keep procrastinating for as long as possible.";
-			guide = new TextField(600, 200, "Guide the backpack to avoid the books/borders and keep procrastinating for as long as possible.", "Verdana", 20, 0xF50000, true);
+			var string:String = "Guide the backpack to avoid the books/borders and keep procrastinating for as long as possible. Burgers allows teleportation for 5 seconds, tap takeout-bag to activate."
+			guide = new TextField(600, 200, string, "Verdana", 20, 0xF50000, true);
 			guide.x = stage.stageWidth / 2 - 300;
 			guide.y = stage.stageHeight - 150;
 			addChild(guide);
@@ -117,6 +128,27 @@ package {
 			highScoreS.x = stage.stageWidth - 50;
 			highScoreS.y = 35;
 			addChild(highScoreS);
+			
+			//add the burger and burgerBag
+			var myBurgerBitmap:Bitmap = new MyBurgerClass();
+            _burgerImage = Image.fromBitmap(myBurgerBitmap);
+			_burgerImage.pivotX = _burgerImage.width / 2;
+			_burgerImage.pivotY = _burgerImage.height / 2;
+			addChild(_burgerImage);
+			
+			var myBurgerBagBitmap:Bitmap = new MyBurgerBagClass();
+            _burgerBagImage = Image.fromBitmap(myBurgerBagBitmap);
+			_burgerBagImage.x = 10;
+			_burgerBagImage.y = 10;
+			_burgerBagImage.addEventListener(TouchEvent.TOUCH, onBagClick);
+			addChild(_burgerBagImage);
+			
+			burgerCount = new TextField(40, 40, String(teleportNum), "Verdana", 30, 0xF50000, true);
+			burgerCount.x = 15;
+			burgerCount.y = 25;
+			burgerCount.addEventListener(TouchEvent.TOUCH, onBagClick);
+			addChild(burgerCount);
+			
 			
 			//add players
             var myBitmap:Bitmap = new MyPlayerClass();
@@ -173,6 +205,18 @@ package {
 				addEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
 			}
 		}
+		private function onBagClick(event:TouchEvent):void
+		{
+			var touchB:Touch = event.getTouch(this, TouchPhase.BEGAN);
+			if (touchB && teleportNum > 0) {
+				teleport = true;
+				teleportNum--;
+				burgerCount.text = String(teleportNum);
+				
+				//so player don't move
+				bagClicked = true;
+			}
+		}
 		private function addBG():void {
 			//1st time
 			if (_libImage == null || _libImage2 == null) {
@@ -198,6 +242,9 @@ package {
 			lvNum = 1;
 			teleport = false;
 			teleportNum = 0;
+			burgerCount.text = String(teleportNum);
+			burgerStage = false;
+			bagClicked = false;
 			frame = 0;
 			timer = 0;
 			lost = false;
@@ -232,10 +279,12 @@ package {
 				_playerImage.x -= (_playerImage.x - event.getTouch(stage).globalX + 40) * .3;
 				_playerImage.y -= (_playerImage.y - event.getTouch(stage).globalY) * .3;
 			}
-			else if (touchB && teleport) {
+			else if (touchB && teleport && !bagClicked) {
 				_playerImage.x = event.getTouch(stage).globalX - 40;
 				_playerImage.y = event.getTouch(stage).globalY;
 			}
+			//right after the bag has been clicked, ignore the 1st touch event
+			bagClicked = false;
 			//left
 			if (_playerImage.x < _playerImage.width / 2 - 2 ) {
 				lose();
@@ -269,9 +318,11 @@ package {
 			_startImage.addEventListener(TouchEvent.TOUCH, onStartButtonClick);
 			setChildIndex(_startImage, numChildren - 1);
 			
-			for ( var i:int = 0; i < noteArray.length; i++) {
-				removeChild(noteArray[i]);
-				removeChild(textArray[i]);
+			if (noteArray != null && textArray != null){
+				for ( var i:int = 0; i < noteArray.length; i++) {
+					removeChild(noteArray[i]);
+					removeChild(textArray[i]);
+				}
 			}
 			noteArray = null;
 			textArray = null;
@@ -309,9 +360,16 @@ package {
 				addChild(_textImage);
 				textArray.push(_textImage);
 			}
+			
+			//add one burger per lv
+			burgerStage = true;
+			_burgerImage.y = 50 + Math.random() * 400;
+			_burgerImage.x = (Math.random() * -900) + (Math.random() * -900);
+
 			setChildIndex(timeLapse, numChildren - 1);
 			setChildIndex(highScore, numChildren - 1);
 			setChildIndex(highScoreS, numChildren - 1);
+			setChildIndex(burgerCount, numChildren - 1);
 		}
         
         private function onEnterFrame(e:EnterFrameEvent):void {
@@ -337,9 +395,9 @@ package {
 				}
 			
 				//hit collision and object movement
+				hitBox.x = _playerImage.x - _playerImage.width/2;
+				hitBox.y = _playerImage.y - _playerImage.height/2;
 				for ( var i:int = 0; i < noteArray.length; i++) {
-					hitBox.x = _playerImage.x - _playerImage.width/2;
-					hitBox.y = _playerImage.y - _playerImage.height/2;
 					if ( (noteArray[i].bounds.intersects(hitBox)) || (textArray[i].bounds.intersects(hitBox))) {
 						lose();
 						break;
@@ -361,12 +419,25 @@ package {
 						textArray[i].x = (Math.random() * -900) + (Math.random() * -900);
 					}
 				}
+				
+				//move burger if its on stage
+				if (burgerStage) {
+					_burgerImage.x += 4;
+					if (_burgerImage.bounds.intersects(hitBox)) {
+						teleportNum++;
+						burgerCount.text = String(teleportNum);
+						
+						//remove burger
+						burgerStage = false;
+						_burgerImage.x = -100;
+					}
+				}
 			
 				//add more objects
 				if ( frame >= 1800 ) {
 					frame = 0;
 					lvNum++;
-					//addObject(lvNum);
+					addObject(lvNum);
 				}
 			}
 		}
