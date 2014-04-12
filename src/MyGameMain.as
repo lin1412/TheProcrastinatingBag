@@ -255,12 +255,13 @@ package {
 				burgerCount.text = String(teleportNum);
 				_auraImage.visible = true;
 				
-				//so player don't move
-				bagClicked = true;
+				
 				
 				//set timer
 				teleportTimer();
 			}
+			//so player don't move
+			bagClicked = true;
 		}
 		
 		private function teleportTimer():void {
@@ -331,7 +332,7 @@ package {
 		private function onTouch(event:TouchEvent):void {
 			var touchB:Touch = event.getTouch(this, TouchPhase.BEGAN);
 			var touchM:Touch = event.getTouch(this, TouchPhase.MOVED);
-			if( (touchB || touchM) && !teleport){
+			if( (touchB || touchM) && !teleport && !bagClicked){
 				_playerImage.x -= (_playerImage.x - event.getTouch(stage).globalX + 60) * .2;
 				_playerImage.y -= (_playerImage.y - event.getTouch(stage).globalY) * .2;
 			}
